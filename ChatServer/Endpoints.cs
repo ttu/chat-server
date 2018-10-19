@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ChatServer
@@ -30,6 +31,28 @@ namespace ChatServer
         public static Task Auth(HttpContext context)
         {
             return context.Response.WriteAsync($"Authenticate");
+        }
+
+        public static Task Logout(HttpContext context)
+        {
+            return context.Response.WriteAsync($"Logout");
+        }
+
+        private static string _messageId = "message";
+        private static string _receiverId = "receiver";
+
+        public static async Task PostMessage(HttpContext context)
+        {
+            var reader = new StreamReader(context.Request.Body);
+            string text = await reader.ReadToEndAsync();
+
+            // TODO: Get IP
+            var ip = context.Connection.RemoteIpAddress;
+
+            if (!text.Contains(_messageId) || !text.Contains(_receiverId))
+                throw new Exception("Not valid message");
+
+            await context.Response.WriteAsync($"Post");
         }
     }
 }
