@@ -1,4 +1,6 @@
-using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
@@ -7,25 +9,32 @@ using Xunit;
 
 namespace ChatServer.Test
 {
-    public class ChatServerIntegrationTests : IClassFixture<WebApplicationFactory<Startup>>
+    public class MyClientRegistryService : IClientRegistryService
     {
-        private readonly WebApplicationFactory<Startup> _factory;
+        public string SavedIp { get; set; }
 
-        public ChatServerIntegrationTests(WebApplicationFactory<Startup> factory)
+        public void Register(string serverIp, string clientIp)
         {
-            _factory = factory;
+            SavedIp = serverIp;
         }
+    }
 
-        [Theory]
-        [InlineData("/")]
-        [InlineData("/api/time")]
-        public async Task GetEndpoints(string url)
+    public class ChatServerIntegrationTestsInject : IClassFixture<CustomWebApplicationFactory<Startup>>
+    {
+        private readonly MyClientRegistryService _service;
+        private readonly TestServer _factory;
+
+        public ChatServerIntegrationTestsInject()
         {
-            var client = _factory.CreateClient();
+            _service = new MyClientRegistryService();
 
-            var response = await client.GetAsync(url);
-
-            response.EnsureSuccessStatusCode();
+            _factory = new TestServer(new WebHostBuilder()
+            .UseStartup<Startup>()
+            .ConfigureTestServices(services =>
+            {
+                //services.AddScoped<IClientRegistryService, MyClientRegistryService>();
+                services.AddSingleton<IClientRegistryService>(_service);
+            }));
         }
 
         [Fact]
@@ -39,6 +48,8 @@ namespace ChatServer.Test
             var response = await client.PostAsync("/api/message", content);
 
             response.EnsureSuccessStatusCode();
+
+            Assert.Equal("10.0.0.1", _service.SavedIp);
         }
     }
 }

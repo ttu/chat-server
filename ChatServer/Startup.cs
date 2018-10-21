@@ -10,6 +10,8 @@ namespace ChatServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting();
+
+            services.AddScoped<IClientRegistryService, ClientRegistryService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
