@@ -1,16 +1,17 @@
 # Chat Server
 
-> Note: This is a project for my own learning purposes
+> Note: This is a project for my own testing purposes
 
 Minimal implementation of server for a chat application.
 
-### Docker
+### Diagram
+
+![diagram](./docs/chat-server.png)
+
+### Getting Started
 
 ```sh
 $ docker-compose build
-```
-
-```sh
 $ docker-compose up
 ```
 
