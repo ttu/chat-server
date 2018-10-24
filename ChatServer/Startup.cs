@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
@@ -8,11 +9,15 @@ namespace ChatServer
 {
     public class Startup
     {
+        public Startup(IConfiguration configuration) => Configuration = configuration;
+
+        public IConfiguration Configuration { get; }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting();
 
-            services.AddSingleton(ConnectionMultiplexer.Connect("localhost"));
+            services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("ConnectionStrings:Redis")));
 
             services.AddScoped<IClientRegistryService, ClientRegistryService>();
             services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
