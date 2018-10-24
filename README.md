@@ -15,6 +15,11 @@ $ docker-compose build
 $ docker-compose up
 ```
 
+Redis
+```sh
+$ docker run -p 6379:6379 --name some-redis -d redis
+```
+
 ### Notes
 
 ##### ChatServer

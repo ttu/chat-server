@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace ChatServer
 {
@@ -11,7 +12,10 @@ namespace ChatServer
         {
             services.AddRouting();
 
+            services.AddSingleton(ConnectionMultiplexer.Connect("localhost"));
+
             services.AddScoped<IClientRegistryService, ClientRegistryService>();
+            services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

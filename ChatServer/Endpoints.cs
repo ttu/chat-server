@@ -47,8 +47,7 @@ namespace ChatServer
             var reader = new StreamReader(context.Request.Body);
             string text = await reader.ReadToEndAsync();
 
-            // TODO: Get IP
-            var ip = context.Connection.RemoteIpAddress;
+            var ip = "192.168.0.1"; // context.Connection.RemoteIpAddress;
 
             if (!text.Contains(_messageId) || !text.Contains(_receiverId))
                 throw new Exception("Not valid message");
