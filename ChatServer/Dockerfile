@@ -4,17 +4,18 @@ EXPOSE 51600
 EXPOSE 44358
 
 FROM microsoft/dotnet:2.1-sdk AS build
-WORKDIR /src
-COPY ["ChatServer/ChatServer.csproj", "ChatServer/"]
-RUN dotnet restore "ChatServer/ChatServer.csproj"
-COPY . .
-WORKDIR "/src/ChatServer"
-RUN dotnet build "ChatServer.csproj" -c Release -o /app
+WORKDIR /app
 
-FROM build AS publish
-RUN dotnet publish "ChatServer.csproj" -c Release -o /app
+# Copy csproj and restore as distinct layers
+COPY *.csproj ./
+RUN dotnet restore
 
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o /app
+
+# Build runtime image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=build /app .
 ENTRYPOINT ["dotnet", "ChatServer.dll"]
