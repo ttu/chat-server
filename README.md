@@ -20,6 +20,11 @@ Redis
 $ docker run -p 6379:6379 --name some-redis -d redis
 ```
 
+RabbitMQ
+```sh
+$ docker run -d --hostname my-rabbit --name some-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
+
 ### Notes
 
 ##### ChatServer

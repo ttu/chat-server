@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 
 namespace ChatServer
@@ -17,13 +19,18 @@ namespace ChatServer
         {
             services.AddRouting();
 
-            services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("ConnectionStrings:Redis")));
+            services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
+            services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
+
+            services.AddSingleton(new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") });
+            services.AddSingleton(s => s.GetService<ConnectionFactory>().CreateConnection());
+            services.AddScoped(s => s.GetService<IConnection>().CreateModel());
 
             services.AddScoped<IClientRegistryService, ClientRegistryService>();
-            services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
+            services.AddScoped<IMessageSender, MessageSender>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -40,6 +47,14 @@ namespace ChatServer
 
             var routes = routeBuilder.Build();
             app.UseRouter(routes);
+
+            TestConnections(services);
+        }
+
+        private void TestConnections(IServiceProvider services)
+        {
+            var redisDb = services.GetService<IDatabase>();
+            var rabbitmq = services.GetService<IConnection>();
         }
     }
 }
