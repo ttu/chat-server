@@ -1,25 +1,36 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using StackExchange.Redis;
+using System;
 
 namespace ChatServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration) => Configuration = configuration;
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
+        {
+            Configuration = configuration;
+            CurrentEnvironment = environment;
+        }
 
         public IConfiguration Configuration { get; }
+        public IHostingEnvironment CurrentEnvironment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting();
 
-            services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
+            if (CurrentEnvironment.EnvironmentName != "Testing")
+            {
+                // Any other way to inject ConnectionMultiplexer correctly
+                services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
+            }
+
+
             services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
 
             services.AddSingleton(new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") });
@@ -30,7 +41,7 @@ namespace ChatServer
             services.AddScoped<IMessageSender, MessageSender>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -43,12 +54,13 @@ namespace ChatServer
             routeBuilder.MapGet("api/name/{name?}", (context) => Endpoints.Name(context));
             routeBuilder.MapPost("api/auth", context => Endpoints.Auth(context));
             routeBuilder.MapPost("api/logout", context => Endpoints.Logout(context));
-            routeBuilder.MapPost("api/message", context => Endpoints.PostMessage(context));
+            routeBuilder.MapPost("api/send", context => Endpoints.Send(context));
+            routeBuilder.MapPost("api/receive", context => Endpoints.Send(context));
 
             var routes = routeBuilder.Build();
             app.UseRouter(routes);
 
-            TestConnections(services);
+            //TestConnections(services);
         }
 
         private void TestConnections(IServiceProvider services)

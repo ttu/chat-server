@@ -42,20 +42,30 @@ namespace ChatServer
         private static string _messageId = "message";
         private static string _receiverId = "receiver";
 
-        public static async Task PostMessage(HttpContext context)
+        public static async Task Send(HttpContext context)
         {
             var reader = new StreamReader(context.Request.Body);
             string text = await reader.ReadToEndAsync();
 
-            var ip = "192.168.0.1"; // context.Connection.RemoteIpAddress;
+            var ip = context.Connection.RemoteIpAddress;
 
             if (!text.Contains(_messageId) || !text.Contains(_receiverId))
                 throw new Exception("Not valid message");
 
-            var service =  context.RequestServices.GetRequiredService<IClientRegistryService>();
-            service.Register("10.0.0.1", ip?.ToString());
+            var host = context.Request.Host.Value;
 
-            await context.Response.WriteAsync($"Post");
+            var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
+            service.FireRegister(host, ip?.ToString());
+
+            var messageService = context.RequestServices.GetRequiredService<IMessageSender>();
+            messageService.Send(text);
+
+            await context.Response.WriteAsync($"Send");
+        }
+
+        public static async Task Receive(HttpContext context)
+        {
+            await context.Response.WriteAsync($"Receive");
         }
     }
 }

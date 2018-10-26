@@ -6,7 +6,7 @@ namespace ChatServer
 {
     public interface IMessageSender
     {
-        void Send(Message message);
+        void Send(string message);
     }
 
     public class Message
@@ -28,10 +28,9 @@ namespace ChatServer
             _channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
-        public void Send(Message message)
+        public void Send(string message)
         {
-            string content = JsonConvert.SerializeObject(message);
-            var body = Encoding.UTF8.GetBytes(content);
+            var body = Encoding.UTF8.GetBytes(message);
             _channel.BasicPublish(exchange: "", routingKey: _queueName, basicProperties: null, body: body);
         }
     }

@@ -10,6 +10,8 @@ namespace ChatServer.Test
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseEnvironment("Testing");
+
             builder.ConfigureTestServices(services =>
             {
                 services.AddScoped<IClientRegistryService, MyClientRegistryService>();
