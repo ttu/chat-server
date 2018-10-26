@@ -27,6 +27,12 @@ $ docker run -d --hostname my-rabbit --name some-rabbit -p 5672:5672 -p 15672:15
 
 ### Notes
 
+### Redis Commander
+
+https://www.npmjs.com/package/redis-commander
+
+http://localhost:8081/
+
 ##### ChatServer
 
 ##### Broker / RabbitMQ

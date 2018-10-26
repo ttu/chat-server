@@ -11,7 +11,7 @@ namespace ChatServer
     {
         public static Task Hello(HttpContext context)
         {
-            return context.Response.WriteAsync("Hello");
+            return context.Response.WriteAsync("Hello from ChatServer");
         }
 
         public static Task Time(HttpContext context)
@@ -29,9 +29,15 @@ namespace ChatServer
             return context.Response.WriteAsync($"You wrote: {context.GetRouteValue("name")}");
         }
 
-        public static Task Auth(HttpContext context)
+        public static Task Login(HttpContext context)
         {
-            return context.Response.WriteAsync($"Authenticate");
+            var ip = context.Connection.RemoteIpAddress;
+            var host = context.Request.Host.Value;
+
+            var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
+            service.FireRegister(host, ip?.ToString());
+
+            return context.Response.WriteAsync($"Login");
         }
 
         public static Task Logout(HttpContext context)

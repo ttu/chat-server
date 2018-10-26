@@ -47,7 +47,7 @@ namespace ChatServer
             routeBuilder.MapGet("api/time", (context) => Endpoints.Time(context));
             routeBuilder.MapGet("api/values/{id:int}", (context) => Endpoints.Values(context));
             routeBuilder.MapGet("api/name/{name?}", (context) => Endpoints.Name(context));
-            routeBuilder.MapPost("api/auth", context => Endpoints.Auth(context));
+            routeBuilder.MapPost("api/login", context => Endpoints.Login(context));
             routeBuilder.MapPost("api/logout", context => Endpoints.Logout(context));
             routeBuilder.MapPost("api/send", context => Endpoints.Send(context));
             routeBuilder.MapPost("api/receive", context => Endpoints.Send(context));
