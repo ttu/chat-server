@@ -1,15 +1,22 @@
 version: '3'
 services:
-  web:
-    build: ./ChatServer
+  chatserver.api:
+    build: ./src/ChatServer
     ports:
      - "5000:5000"
     depends_on:
      - redis
      - rabbitmq
-  redis:
+  chatbroker.api:
+    build: ./src/ChatBroker
+    ports:
+     - "5550:5550"
+    depends_on:
+     - redis
+     - rabbitmq
+  redis.db:
     image: "redis:latest"
-  postgres:
+  postgres.db:
     image: "postgres:latest"
-  rabbitmq:
+  rabbitmq.bus:
     image: "rabbitmq:management"

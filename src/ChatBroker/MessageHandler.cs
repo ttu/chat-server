@@ -18,9 +18,6 @@ namespace ChatBroker
 
         public void Start()
         {
-            // Loop messages from the queue
-
-            // Start new Thread for each meassage
             var channel = _connection.CreateModel();
             channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
