@@ -50,7 +50,7 @@ namespace ChatServer
             routeBuilder.MapPost("api/login", context => Endpoints.Login(context));
             routeBuilder.MapPost("api/logout", context => Endpoints.Logout(context));
             routeBuilder.MapPost("api/send", context => Endpoints.Send(context));
-            routeBuilder.MapPost("api/receive", context => Endpoints.Send(context));
+            routeBuilder.MapPost("api/receive", context => Endpoints.Receive(context));
 
             var routes = routeBuilder.Build();
             app.UseRouter(routes);

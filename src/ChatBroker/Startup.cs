@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
+using StackExchange.Redis;
 using System;
+using System.Net.Http;
 
 namespace ChatBroker
 {
@@ -21,10 +23,18 @@ namespace ChatBroker
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
+
+            services.AddSingleton(s => ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
+
             services.AddSingleton(new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") });
             services.AddSingleton(s => s.GetService<ConnectionFactory>().CreateConnection());
 
-            services.AddSingleton(s => new MessageHandler(s.GetService<IConnection>()));
+            services.AddSingleton(s => new MessageHandler(
+                            s.GetService<IConnection>(), 
+                            s.GetService<ConnectionMultiplexer>(),
+                            s.GetService<IHttpClientFactory>()));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -30,8 +30,8 @@ namespace ChatServer
 
         public void Send(string message)
         {
-            string output = new string(message.Where(c => !char.IsControl(c)).ToArray());
-            var body = Encoding.UTF8.GetBytes(output);
+            //string output = new string(message.Where(c => !char.IsControl(c)).ToArray());
+            var body = Encoding.UTF8.GetBytes(message);
             _channel.BasicPublish(exchange: "", routingKey: _queueName, basicProperties: null, body: body);
         }
     }

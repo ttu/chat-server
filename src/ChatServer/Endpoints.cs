@@ -71,6 +71,9 @@ namespace ChatServer
 
         public static async Task Receive(HttpContext context)
         {
+            var reader = new StreamReader(context.Request.Body);
+            string text = await reader.ReadToEndAsync();
+
             await context.Response.WriteAsync($"Receive");
         }
     }
