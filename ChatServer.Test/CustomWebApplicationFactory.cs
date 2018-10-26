@@ -10,7 +10,7 @@ namespace ChatServer.Test
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Testing");
+            builder.UseEnvironment(Startup.TestingEnv);
 
             builder.ConfigureTestServices(services =>
             {

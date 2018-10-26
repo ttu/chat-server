@@ -11,26 +11,21 @@ namespace ChatServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IHostingEnvironment environment)
+        public const string TestingEnv = "Testing";
+
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            CurrentEnvironment = environment;
         }
 
         public IConfiguration Configuration { get; }
-        public IHostingEnvironment CurrentEnvironment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRouting();
 
-            if (CurrentEnvironment.EnvironmentName != "Testing")
-            {
-                // Any other way to inject ConnectionMultiplexer correctly
-                services.AddSingleton(ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
-            }
-
-
+            // Use implementationfactory for lazy initialization
+            services.AddSingleton(s => ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
             services.AddScoped(s => s.GetService<ConnectionMultiplexer>().GetDatabase());
 
             services.AddSingleton(new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") });
@@ -60,7 +55,10 @@ namespace ChatServer
             var routes = routeBuilder.Build();
             app.UseRouter(routes);
 
-            //TestConnections(services);
+            if (env.EnvironmentName != Startup.TestingEnv)
+            {
+                TestConnections(services);
+            }
         }
 
         private void TestConnections(IServiceProvider services)

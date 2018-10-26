@@ -1,19 +1,18 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using StackExchange.Redis;
+using NSubstitute;
+using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using NSubstitute;
-using Microsoft.AspNetCore.Http;
-using System.Net;
-using Microsoft.AspNetCore.Builder;
-using System;
-using Microsoft.Extensions.Configuration;
 
 namespace ChatServer.Test
 {
@@ -46,7 +45,7 @@ namespace ChatServer.Test
 
     public class StartupStub : ChatServer.Startup
     {
-        public StartupStub(IConfiguration configuration, IHostingEnvironment environment) : base(configuration, environment)
+        public StartupStub(IConfiguration configuration) : base(configuration)
         {
         }
 
@@ -57,28 +56,25 @@ namespace ChatServer.Test
         }
     }
 
-    public class ChatServerIntegrationTestsInject : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class ChatServerIntegrationTests : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
         private readonly MyClientRegistryService _service;
         private readonly TestServer _factory;
 
-        public ChatServerIntegrationTestsInject()
+        public ChatServerIntegrationTests()
         {
             _service = new MyClientRegistryService();
 
             _factory = new TestServer(new WebHostBuilder()
-            .UseStartup<StartupStub>()
-            .UseEnvironment("Testing")
-            .ConfigureTestServices(services =>
-            {
-                var con = Substitute.For<IConnectionMultiplexer>();
-                services.AddSingleton(con);
+                .UseStartup<StartupStub>()
+                .UseEnvironment(Startup.TestingEnv)
+                .ConfigureTestServices(services =>
+                {
+                    var msg = Substitute.For<IMessageSender>();
+                    services.AddSingleton(msg);
 
-                var msg = Substitute.For<IMessageSender>();
-                services.AddSingleton(msg);
-
-                services.AddSingleton<IClientRegistryService>(_service);
-            }));
+                    services.AddSingleton<IClientRegistryService>(_service);
+                }));
         }
 
         [Fact]
