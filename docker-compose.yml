@@ -10,7 +10,7 @@ services:
      - rabbitmq
     environment:
      - ASPNETCORE_URLS=http://0.0.0.0:5000
-     - ASPNETCORE_ENVIRONMENT=Development
+     - ASPNETCORE_ENVIRONMENT=Docker
      - Connections__Redis=redis
      - Connections__RabbitMQ=rabbitmq
   chatbroker.api:
@@ -23,7 +23,7 @@ services:
      - rabbitmq
     environment:
      - ASPNETCORE_URLS=http://0.0.0.0:5550
-     - ASPNETCORE_ENVIRONMENT=Development
+     - ASPNETCORE_ENVIRONMENT=Docker
      - Connections__Redis=redis
      - Connections__RabbitMQ=rabbitmq
   redis:
