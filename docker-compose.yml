@@ -2,21 +2,38 @@ version: '3'
 services:
   chatserver.api:
     build: ./src/ChatServer
+    restart: on-failure
     ports:
      - "5000:5000"
     depends_on:
      - redis
      - rabbitmq
+    environment:
+     - ASPNETCORE_URLS=http://0.0.0.0:5000
+     - ASPNETCORE_ENVIRONMENT=Development
+     - Connections__Redis=redis
+     - Connections__RabbitMQ=rabbitmq
   chatbroker.api:
     build: ./src/ChatBroker
+    restart: on-failure
     ports:
      - "5550:5550"
     depends_on:
      - redis
      - rabbitmq
-  redis.db:
+    environment:
+     - ASPNETCORE_URLS=http://0.0.0.0:5550
+     - ASPNETCORE_ENVIRONMENT=Development
+     - Connections__Redis=redis
+     - Connections__RabbitMQ=rabbitmq
+  redis:
     image: "redis:latest"
-  postgres.db:
+    ports:
+     - "6379:6379"
+  postgres:
     image: "postgres:latest"
-  rabbitmq.bus:
-    image: "rabbitmq:management"
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+     - "5672:5672"    
+     - "15672:15672"
