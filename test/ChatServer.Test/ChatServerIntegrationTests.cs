@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -13,7 +13,7 @@ namespace ChatServer.Test
     public class ChatServerIntegrationTests
     {
         [Fact]
-        public async Task WebSockets_CalledTwice()
+        public async Task WebSocket_ReceiveMessage()
         {
             var are = new AutoResetEvent(false);
 
@@ -23,8 +23,8 @@ namespace ChatServer.Test
 
             websocket.MessageReceived += (s, e) =>
             {
-                var msg = JsonConvert.DeserializeObject<dynamic>(e.Message);
-                Assert.Equal("hello", msg.payload);
+                var msg = JsonConvert.DeserializeObject<JToken>(e.Message);
+                Assert.Equal("hello", msg["payload"].Value<string>());
                 are.Set();
             };
 
@@ -36,17 +36,18 @@ namespace ChatServer.Test
 
             websocket.Open();
 
-            are.WaitOne();
+            are.WaitOne(); // wait for open
 
             var client = new HttpClient();
 
-            var message = new { receiver = "timmy", payload = "hello"};
+            var message = new { receiver = "timmy", payload = "hello" };
             var content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
             var result = await client.PostAsync($"http://localhost:5000/api/send", content);
             result.EnsureSuccessStatusCode();
 
-            are.WaitOne();
+            are.WaitOne(); // wait for message
 
+            websocket.Close();
         }
     }
 }

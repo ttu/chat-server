@@ -14,6 +14,8 @@ namespace ChatBroker
 {
     public class Startup
     {
+        public static string BrodcastHost;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -40,7 +42,7 @@ namespace ChatBroker
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -54,6 +56,7 @@ namespace ChatBroker
 
             if (env.EnvironmentName == "Docker")
             {
+                logger.LogInformation("Waiting for services");
                 WaitConnections(services);
             }
 

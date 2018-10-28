@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NSubstitute;
 using System;
@@ -49,10 +50,10 @@ namespace ChatServer.Test
         {
         }
 
-        public override void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
+        public override void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services, ILogger<Startup> logger)
         {
             app.UseMiddleware<FakeRemoteIpAddressMiddleware>();
-            base.Configure(app, env, services);
+            base.Configure(app, env, services, logger);
         }
     }
 

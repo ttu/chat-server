@@ -60,7 +60,7 @@ namespace ChatBroker
             {
                 try
                 {
-                    var url = $"http://{serverAddress}/api/receive";
+                    var url = $"{serverAddress}/api/receive";
 
                     _logger.LogInformation($"Sending message to: {url}");
 

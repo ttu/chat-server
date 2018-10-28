@@ -1,5 +1,4 @@
 ﻿using RabbitMQ.Client;
-using System.Linq;
 using System.Text;
 
 namespace ChatServer
@@ -8,8 +7,6 @@ namespace ChatServer
     {
         void Send(string message);
     }
-
-
 
     public class MessageSender : IMessageSender
     {
@@ -20,7 +17,7 @@ namespace ChatServer
         {
             _channel = channel;
             // TODO: Should use QueueDeclareNoWait in initialization?
-            _channel.QueueDeclare(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            _channel.QueueDeclareNoWait(queue: _queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
         }
 
         public void Send(string message)

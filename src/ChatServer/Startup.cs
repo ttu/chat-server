@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
@@ -13,6 +14,7 @@ namespace ChatServer
     public class Startup
     {
         public const string TestingEnv = "Testing";
+        public static string OwnHost;
 
         public Startup(IConfiguration configuration)
         {
@@ -23,6 +25,8 @@ namespace ChatServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            OwnHost = Configuration.GetValue<string>("OwnHost");
+
             services.AddRouting();
 
             // Use implementationfactory for lazy initialization
@@ -39,7 +43,7 @@ namespace ChatServer
             services.AddSingleton<WebSocketService>();
         }
 
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -64,6 +68,7 @@ namespace ChatServer
 
             if (env.EnvironmentName == "Docker")
             {
+                logger.LogInformation("Waiting for services");
                 WaitConnections(services);
             }
 

@@ -13,6 +13,7 @@ services:
      - ASPNETCORE_ENVIRONMENT=Docker
      - Connections__Redis=redis
      - Connections__RabbitMQ=rabbitmq
+     - OwnHost=http://chatserver.api:5000
   chatbroker.api:
     build: ./src/ChatBroker
     restart: on-failure
@@ -26,6 +27,7 @@ services:
      - ASPNETCORE_ENVIRONMENT=Docker
      - Connections__Redis=redis
      - Connections__RabbitMQ=rabbitmq
+     - OwnHost=http://chatbroker.api:5550
   redis:
     image: "redis:latest"
     ports:

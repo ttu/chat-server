@@ -10,24 +10,27 @@ Server for a chat application.
 
 ### Getting Started
 
+### Run with Docker Compose
+
 ```sh
 $ docker-compose build
 $ docker-compose up
 ```
 
-Redis
+### Run development environment
+
+Install required systems:
+
 ```sh
-$ docker run -p 6379:6379 --name some-redis -d redis
-```
+# Redis
+$ docker run -p 6379:6379 --name chat-redis -d redis
 
 RabbitMQ
-```sh
-$ docker run -d --hostname my-rabbit --name some-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-```
+$ docker run -d --hostname my-rabbit --name chat-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 
-```sh
-docker start some-redis && docker start some-rabbit
-docker stop some-redis && docker stop some-rabbit
+# quick start/stop
+$ docker start chat-redis && docker start chat-rabbit
+$ docker stop chat-redis && docker stop chat-rabbit
 ```
 
 ### Notes
@@ -46,39 +49,56 @@ $ npm install -g redis-commander
 $ redis-commander
 ```
 
-http://localhost:8081/
+Open: http://localhost:8081/
 
 ##### ChatServer
 
+...
+
 ##### Broker / RabbitMQ
+
+...
 
 ##### ClientRegister / Redis
 
+...
+
 ##### Authentication
 
+...
+
+
+#### Flow
 
 ```
-New client online:
+# Client logs in
+
+ChatServer: Login
  Authenticate
  Send update to client register
- Check if there is waiting messages for the client in the sent_queu
+ Check if there is waiting messages for the client in the sent_queue
 
-Server: New Message
+# Client sends a new message
+
+ChatServer: New message /api/send
  Validate
  Send update to client register
- Send message to broker
+ Send message to RabbitMQ
 
-Broker: New message
+ChatBroker: New message from RabbitMQ
  Get receiver server from client register
- Send to correct server
  Save message to sent_queue
+ Send to correct server /api/receive
+  Success
+   Remove message from sent_queue
+  Fail
+   Update message status to sent_queue_
 
-Server: New receiver message
- Send to reveiver with WebSocket
+ChatServer: New message /api/receive
+ Send to receiver with WebSocket
  Send status to broker (success/fail)
 
-Broker: Received message
- Remove message from sent_queue
+ 
 
 
 ```

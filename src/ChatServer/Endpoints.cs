@@ -63,7 +63,10 @@ namespace ChatServer
             if (!text.Contains(_payloadId) || !text.Contains(_receiverId))
                 throw new Exception("Not valid message");
 
-            var host = context.Request.Host.Value;
+            var host = Startup.OwnHost;//context.Request.Host.Value;
+
+            var _logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
+            _logger.LogInformation($"FireRegister - Server: {host} User: {tt.Receiver}");
 
             var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
             service.FireRegister(host, tt.Receiver);
