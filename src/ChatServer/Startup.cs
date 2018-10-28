@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
+using System.Threading.Tasks;
 
 namespace ChatServer
 {
@@ -61,10 +62,39 @@ namespace ChatServer
 
             app.UseMiddleware<WebSocketMiddleware>();
 
+            if (env.EnvironmentName == "Docker")
+            {
+                WaitConnections(services);
+            }
+
             if (env.EnvironmentName != Startup.TestingEnv)
             {
                 TestConnections(services);
             }
+        }
+
+        private void WaitConnections(IServiceProvider services)
+        {
+            void ExecuteWhileTrue(Action act)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        act();
+                        return;
+                    }
+                    catch (Exception) { }
+
+                    Task.Delay(1000).Wait();
+                }
+            }
+
+            var redisTest = new Action(() => ConnectionMultiplexer.Connect(Configuration.GetValue<string>("Connections:Redis")));
+            var rabbitTest = new Action(() => new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") }.CreateConnection());
+
+            ExecuteWhileTrue(redisTest);
+            ExecuteWhileTrue(rabbitTest);
         }
 
         private void TestConnections(IServiceProvider services)

@@ -2,7 +2,7 @@
 
 > Note: This is a project for my own testing purposes
 
-Minimal implementation of server for a chat application.
+Server for a chat application.
 
 ### Diagram
 
@@ -25,11 +25,26 @@ RabbitMQ
 $ docker run -d --hostname my-rabbit --name some-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 ```
 
+```sh
+docker start some-redis && docker start some-rabbit
+docker stop some-redis && docker stop some-rabbit
+```
+
 ### Notes
+
+#### TODO
+
+*
+* 
 
 #### Redis Commander
 
 https://www.npmjs.com/package/redis-commander
+
+```sh
+$ npm install -g redis-commander
+$ redis-commander
+```
 
 http://localhost:8081/
 
@@ -45,6 +60,7 @@ http://localhost:8081/
 ```
 New client online:
  Authenticate
+ Send update to client register
  Check if there is waiting messages for the client in the sent_queu
 
 Server: New Message
@@ -62,7 +78,6 @@ Server: New receiver message
  Send status to broker (success/fail)
 
 Broker: Received message
- Can't use RabbitMQ ack as this would block handler completely
  Remove message from sent_queue
 
 
@@ -83,3 +98,9 @@ https://medium.com/@tampajohn/net-core-2-and-golang-797566350095
 #### Integration tests
 
 https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1#customize-webapplicationfactory
+
+### Docker networking
+
+https://runnable.com/docker/docker-compose-networking
+
+https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/multi-container-applications-docker-compose
