@@ -34,6 +34,8 @@ namespace ChatServer
 
             services.AddScoped<IClientRegistryService, ClientRegistryService>();
             services.AddScoped<IMessageSender, MessageSender>();
+
+            services.AddSingleton<WebSocketService>();
         }
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider services)
@@ -54,6 +56,10 @@ namespace ChatServer
 
             var routes = routeBuilder.Build();
             app.UseRouter(routes);
+
+            app.UseWebSockets();
+
+            app.UseMiddleware<WebSocketMiddleware>();
 
             if (env.EnvironmentName != Startup.TestingEnv)
             {

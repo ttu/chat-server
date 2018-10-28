@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using StackExchange.Redis;
@@ -13,13 +14,18 @@ namespace ChatBroker
         private readonly IConnection _connection;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<MessageHandler> _logger;
         private readonly string _queueName = "hello";
 
-        public MessageHandler(IConnection connection, IConnectionMultiplexer connectionMultiplexer, IHttpClientFactory httpClientFactory)
+        public MessageHandler(IConnection connection, 
+            IConnectionMultiplexer connectionMultiplexer, 
+            IHttpClientFactory httpClientFactory,
+            ILogger<MessageHandler> logger)
         {
             _connection = connection;
             _connectionMultiplexer = connectionMultiplexer;
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
 
             Start();
         }
@@ -42,6 +48,8 @@ namespace ChatBroker
 
         public async Task HandleMessage(string message)
         {
+            _logger.LogInformation("New messsage");
+
             var clientIp = JObject.Parse(message)["receiver"].Value<string>();
 
             var db = _connectionMultiplexer.GetDatabase();
@@ -52,11 +60,16 @@ namespace ChatBroker
             {
                 try
                 {
-                    var result = await client.PostAsJsonAsync("http://" + serverAddress + "/api/receive", message);
+                    var url = $"http://{serverAddress}/api/receive";
+
+                    _logger.LogInformation($"Sending message to: {url}");
+
+                    var result = await client.PostAsync(url, new StringContent(message));
 
                     if (result.IsSuccessStatusCode == false)
                     {
                         // Add result to send later queue
+                        _logger.LogInformation($"Failed sending message to: {url}");
                     }
                 }
                 catch (System.Exception)

@@ -4,11 +4,11 @@ using Xunit;
 
 namespace ChatServer.Test
 {
-    public class ChatServerIntegrationTestsWithFactory : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class ChatServerTestServerFactoryTests : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
         private readonly WebApplicationFactory<Startup> _factory;
 
-        public ChatServerIntegrationTestsWithFactory(CustomWebApplicationFactory<Startup> factory)
+        public ChatServerTestServerFactoryTests(CustomWebApplicationFactory<Startup> factory)
         {
             _factory = factory;
         }
