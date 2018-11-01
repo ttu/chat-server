@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -48,7 +49,8 @@ namespace ChatServer
             var socketHash = webSocket.GetHashCode().ToString();
 
             _sockets.TryRemove(socketHash, out WebSocket toRemove);
-            _userNameCollection.TryRemove(socketHash, out string userName);
+            var userToRemove = _userNameCollection.Where(kvp => kvp.Value == socketHash).FirstOrDefault();
+            _userNameCollection.TryRemove(userToRemove.Key, out string hash);
         }
 
         public async Task<bool> Send(Message message)
