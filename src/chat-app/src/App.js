@@ -1,24 +1,88 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import "./App.css";
+
+import client from "./client.js";
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      temp: "Calvin",
+      message: "",
+      receiver: "B",
+      received: []
+    };
+  }
+
+  componentDidMount() {
+    this.connection = new WebSocket("ws://localhost:5000/ws");
+
+    this.connection.onmessage = evt => {
+      this.setState(state => ({ received: [...state.received, evt.data] }));
+      console.log(JSON.stringify(evt.data));
+    };
+  }
+
+  handleChange = (event, propName) => {
+    this.setState({
+      [propName]: event.target.value
+    });
+    event.preventDefault();
+  };
+
+  setName = () => {
+    this.setState(state => ({
+      name: state.temp
+    }));
+    this.connection.send("username:" + this.state.temp);
+  };
+
+  sendMessage = () => {
+    client.postData("http://localhost:5000/api/send", {
+      receiver: this.state.receiver,
+      payload: this.state.message
+    });
+  };
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+
+          <p>Hello: {this.state.name}</p>
+
+          <input
+            type="text"
+            value={this.state.temp}
+            onChange={e => this.handleChange(e, 'temp')}
+          />
+          <input type="submit" value="Set name" onClick={this.setName} />
+
+          <p>Receiver: {this.state.receiver}</p>
+
+          <input
+            type="text"
+            value={this.state.receiver}
+            onChange={e => this.handleChange(e, 'receiver')}
+          />
+
+          <p>Message:</p>
+
+          <input
+            type="text"
+            value={this.state.message}
+            onChange={e => this.handleChange(e, 'message')}
+          />
+          <input type="submit" value="Send" onClick={this.sendMessage} />
+
+          <p>Received:</p>
+          <div>
+            {this.state.received.map(line => (
+              <div>{JSON.stringify(line)}</div>
+            ))}
+          </div>
+
         </header>
       </div>
     );
