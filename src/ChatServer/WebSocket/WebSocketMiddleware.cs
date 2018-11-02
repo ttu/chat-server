@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -15,7 +16,7 @@ namespace ChatServer
     public class WebSocketService
     {
         private readonly ConcurrentDictionary<string, WebSocket> _sockets = new ConcurrentDictionary<string, WebSocket>();
-        private readonly ConcurrentDictionary<string, string> _userNameCollection = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, List<string>> _userNameCollection = new ConcurrentDictionary<string, List<string>>();
         private readonly ILogger<WebSocketService> _logger;
 
         private readonly JsonSerializerSettings _camelCaseSettings = new JsonSerializerSettings
@@ -41,7 +42,9 @@ namespace ChatServer
             _logger.LogInformation($"New user: {userName}");
 
             var socketHash = webSocket.GetHashCode().ToString();
-            _userNameCollection.TryAdd(userName, socketHash);
+
+            _userNameCollection.TryAdd(userName, new List<string>());
+            _userNameCollection[userName].Add(socketHash);
         }
 
         public void RemoveConnection(WebSocket webSocket)
@@ -49,22 +52,30 @@ namespace ChatServer
             var socketHash = webSocket.GetHashCode().ToString();
 
             _sockets.TryRemove(socketHash, out WebSocket toRemove);
-            var userToRemove = _userNameCollection.Where(kvp => kvp.Value == socketHash).FirstOrDefault();
-            _userNameCollection.TryRemove(userToRemove.Key, out string hash);
+            _userNameCollection.FirstOrDefault(kvp => kvp.Value.Contains(socketHash)).Value?.Remove(socketHash);
         }
 
         public async Task<bool> Send(Message message)
         {
-            if (_userNameCollection.TryGetValue(message.Receiver, out string hash) == false)
+            if (_userNameCollection.TryGetValue(message.Receiver, out List<string> sockets) == false)
                 return false;
 
-            var socket = _sockets[hash];
+            foreach (var hash in sockets.ToList())
+            {
+                var socket = _sockets[hash];
 
-            var text = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, _camelCaseSettings));
-            var buffer = new ArraySegment<byte>(text);
-            await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                if (socket.State != WebSocketState.Open)
+                {
+                    // TODO: Remove from sockets. Check that at least once sent.
+                    continue;
+                }
 
-            _logger.LogInformation($"Sent message for: {message.Receiver}");
+                var text = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message, _camelCaseSettings));
+                var buffer = new ArraySegment<byte>(text);
+                await socket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+
+                _logger.LogInformation($"Sent message for: {message.Receiver}");
+            }
 
             return true;
         }

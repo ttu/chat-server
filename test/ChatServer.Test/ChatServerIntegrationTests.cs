@@ -10,6 +10,36 @@ using Xunit;
 
 namespace ChatServer.Test
 {
+    public class Client
+    {
+        private readonly WebSocket _webscoket;
+
+        public Client(string userName, AutoResetEvent are)
+        {
+            _webscoket = new WebSocket($"ws://localhost:5000/ws");
+
+            _webscoket.Opened += (s, e) =>
+            {
+                _webscoket.Send($"username:{userName}");
+                are.Set();
+            };
+
+            _webscoket.MessageReceived += (s, e) =>
+            {
+                var msg = JsonConvert.DeserializeObject<JToken>(e.Message);
+                Assert.Equal("hello", msg["payload"].Value<string>());
+                are.Set();
+            };
+
+            _webscoket.Open();
+        }
+
+        public void Close()
+        {
+            _webscoket.Close();
+        }
+    }
+
     public class ChatServerIntegrationTests
     {
         [Fact]
@@ -17,24 +47,11 @@ namespace ChatServer.Test
         {
             var are = new AutoResetEvent(false);
 
-            var webSoketMessages = new List<dynamic>();
+            var chatClient = new Client("timmy", are);
 
-            var websocket = new WebSocket($"ws://localhost:5000/ws");
+            are.WaitOne(); // wait for open
 
-            websocket.MessageReceived += (s, e) =>
-            {
-                var msg = JsonConvert.DeserializeObject<JToken>(e.Message);
-                Assert.Equal("hello", msg["payload"].Value<string>());
-                are.Set();
-            };
-
-            websocket.Opened += (s, e) =>
-            {
-                websocket.Send("username:timmy");
-                are.Set();
-            };
-
-            websocket.Open();
+            var chatClient2 = new Client("james", are);
 
             are.WaitOne(); // wait for open
 
@@ -47,7 +64,15 @@ namespace ChatServer.Test
 
             are.WaitOne(); // wait for message
 
-            websocket.Close();
+            message = new { receiver = "james", payload = "hello" };
+            content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+            result = await client.PostAsync($"http://localhost:5000/api/send", content);
+            result.EnsureSuccessStatusCode();
+
+            are.WaitOne(); // wait for message
+
+            chatClient.Close();
+            chatClient2.Close();
         }
     }
 }
