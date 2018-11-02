@@ -3,6 +3,9 @@ import "./App.css";
 
 import client from "./client.js";
 
+const CHAT_URL = process.env.CHAT_URL || 'http://localhost:5000/api';
+const CHAT_WS = process.env.CHAT_WS || 'ws://localhost:5000/ws';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -16,7 +19,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.connection = new WebSocket("ws://localhost:5000/ws");
+    this.connection = new WebSocket(CHAT_WS);
 
     this.connection.onmessage = evt => {
       this.setState(state => ({ received: [...state.received, evt.data] }));
@@ -39,7 +42,7 @@ class App extends Component {
   };
 
   sendMessage = () => {
-    client.postData("http://localhost:5000/api/send", {
+    client.postData(`${CHAT_URL}/send`, {
       receiver: this.state.receiver,
       payload: this.state.message
     });
