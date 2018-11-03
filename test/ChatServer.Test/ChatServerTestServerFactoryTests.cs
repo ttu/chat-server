@@ -15,7 +15,6 @@ namespace ChatServer.Test
 
         [Theory]
         [InlineData("/")]
-        [InlineData("/api/time")]
         public async Task GetEndpoints(string url)
         {
             var client = _factory.CreateClient();

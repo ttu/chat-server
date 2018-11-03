@@ -27,6 +27,15 @@ namespace ChatServer
         {
             OwnHost = Configuration.GetValue<string>("OwnHost");
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+
             services.AddRouting();
 
             // Use implementationfactory for lazy initialization
@@ -51,9 +60,7 @@ namespace ChatServer
             var routeBuilder = new RouteBuilder(app);
 
             routeBuilder.MapGet("", (context) => Endpoints.Hello(context));
-            routeBuilder.MapGet("api/time", (context) => Endpoints.Time(context));
-            routeBuilder.MapGet("api/values/{id:int}", (context) => Endpoints.Values(context));
-            routeBuilder.MapGet("api/name/{name?}", (context) => Endpoints.Name(context));
+            routeBuilder.MapGet("api/status/{username:required}", (context) => Endpoints.GetUserStatus(context));
             routeBuilder.MapPost("api/login", context => Endpoints.Login(context));
             routeBuilder.MapPost("api/logout", context => Endpoints.Logout(context));
             routeBuilder.MapPost("api/send", context => Endpoints.Send(context));
@@ -61,6 +68,8 @@ namespace ChatServer
 
             var routes = routeBuilder.Build();
             app.UseRouter(routes);
+
+            app.UseCors("AllowAnyPolicy");
 
             app.UseWebSockets();
 

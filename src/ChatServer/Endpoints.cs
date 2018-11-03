@@ -11,33 +11,30 @@ namespace ChatServer
 {
     public static class Endpoints
     {
+        private static string _payloadId = "payload";
+        private static string _receiverId = "receiver";
+
         public static Task Hello(HttpContext context)
         {
             return context.Response.WriteAsync("Hello from ChatServer");
         }
 
-        public static Task Time(HttpContext context)
+        public static async Task GetUserStatus(HttpContext context)
         {
-            return context.Response.WriteAsync(DateTime.Now.ToShortTimeString());
-        }
+            string username = context.GetRouteValue("username") as string;
 
-        public static Task Values(HttpContext context)
-        {
-            return context.Response.WriteAsync($"You wrote: {context.GetRouteValue("id")}");
-        }
+            var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
+            var found = await service.Get(username);
 
-        public static Task Name(HttpContext context)
-        {
-            return context.Response.WriteAsync($"You wrote: {context.GetRouteValue("name")}");
+            await context.Response.WriteAsync($"{username} is {(string.IsNullOrEmpty(found) ? "offline" : "online")}");
         }
 
         public static Task Login(HttpContext context)
         {
-            var ip = context.Connection.RemoteIpAddress;
-            var host = context.Request.Host.Value;
+            var userName = "TODO";
 
             var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
-            service.FireRegister(host, ip?.ToString());
+            service.FireRegister(Startup.OwnHost, userName);
 
             return context.Response.WriteAsync($"Login");
         }
@@ -47,30 +44,36 @@ namespace ChatServer
             return context.Response.WriteAsync($"Logout");
         }
 
-        private static string _payloadId = "payload";
-        private static string _receiverId = "receiver";
-
         public static async Task Send(HttpContext context)
         {
             var reader = new StreamReader(context.Request.Body);
             string text = await reader.ReadToEndAsync();
+            string sender = context.Request.Headers["X-Username"].ToString();
+
+            if (string.IsNullOrEmpty(sender))
+                throw new Exception("Sender not authenticated");
 
             if (!text.Contains(_payloadId) || !text.Contains(_receiverId))
                 throw new Exception("Not valid message");
 
-            var tt = JsonConvert.DeserializeObject<Message>(text);
-
-            var _logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
-            _logger.LogInformation($"FireRegister - Server: {Startup.OwnHost} User: {tt.Receiver}");
-
-            // TODO: Same user in multiple server
-            var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
-            service.FireRegister(Startup.OwnHost, tt.Receiver);
-
-            var messageService = context.RequestServices.GetRequiredService<IMessageSender>();
-            messageService.Send(text);
+            Handle(text,
+                sender,
+                context.RequestServices.GetRequiredService<ILogger<Startup>>(),
+                context.RequestServices.GetRequiredService<IClientRegistryService>(),
+                context.RequestServices.GetRequiredService<IMessageSender>());
 
             await context.Response.WriteAsync($"Send");
+        }
+
+        private static void Handle(string message, string senderName, ILogger<Startup> logger, IClientRegistryService clientRegister, IMessageSender messageSender)
+        {
+            var tt = JsonConvert.DeserializeObject<Message>(message);
+
+            logger.LogInformation($"FireRegister - Server: {Startup.OwnHost} User: {tt.Receiver}");
+
+            // TODO: Same user in multiple server
+            clientRegister.FireRegister(Startup.OwnHost, senderName);
+            messageSender.Send(message);
         }
 
         public static async Task Receive(HttpContext context)

@@ -57,15 +57,19 @@ namespace ChatServer.Test
 
             var client = new HttpClient();
 
+            // james sends a message to timmy
             var message = new { receiver = "timmy", payload = "hello" };
             var content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+            content.Headers.Add("X-Username", "james");
             var result = await client.PostAsync($"http://localhost:5000/api/send", content);
             result.EnsureSuccessStatusCode();
 
             are.WaitOne(); // wait for message
 
+            // timmy sends a message to james
             message = new { receiver = "james", payload = "hello" };
             content = new StringContent(JsonConvert.SerializeObject(message), Encoding.UTF8, "application/json");
+            content.Headers.Add("X-Username", "timmy");
             result = await client.PostAsync($"http://localhost:5000/api/send", content);
             result.EnsureSuccessStatusCode();
 

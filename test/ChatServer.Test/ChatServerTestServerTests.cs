@@ -73,7 +73,7 @@ namespace ChatServer.Test
                 {
                     var msg = Substitute.For<IMessageSender>();
                     services.AddSingleton(msg);
-
+                    Startup.OwnHost = "TestServer";
                     services.AddSingleton<IClientRegistryService>(_service);
                 }));
         }
@@ -83,16 +83,17 @@ namespace ChatServer.Test
         {
             var client = _factory.CreateClient();
 
-            var clientIp = "127.168.1.10";
+            //var clientIp = "127.168.1.10";
+            var username = "timmy";
 
-            var updateBook = new { receiver = "X011AAS", message = "Hi! It's me." };
-
+            var updateBook = new { receiver = "X011AAS", payload = "Hi! It's me." };
             var content = new StringContent(JsonConvert.SerializeObject(updateBook), Encoding.UTF8, "application/json");
+            content.Headers.Add("X-Username", username);
             var response = await client.PostAsync("/api/send", content);
 
             response.EnsureSuccessStatusCode();
 
-            Assert.Equal("localhost", await _service.Get(clientIp));
+            Assert.Equal("TestServer", await _service.Get(username));
         }
     }
 }

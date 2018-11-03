@@ -42,7 +42,7 @@ class App extends Component {
   };
 
   sendMessage = () => {
-    client.postData(`${CHAT_URL}/send`, {
+    client.postData(`${CHAT_URL}/send`, this.state.name, {
       receiver: this.state.receiver,
       payload: this.state.message
     });

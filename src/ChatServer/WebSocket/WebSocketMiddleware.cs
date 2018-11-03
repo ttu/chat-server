@@ -18,15 +18,17 @@ namespace ChatServer
         private readonly ConcurrentDictionary<string, WebSocket> _sockets = new ConcurrentDictionary<string, WebSocket>();
         private readonly ConcurrentDictionary<string, List<string>> _userNameCollection = new ConcurrentDictionary<string, List<string>>();
         private readonly ILogger<WebSocketService> _logger;
+        private readonly IClientRegistryService _clientRegistry;
 
         private readonly JsonSerializerSettings _camelCaseSettings = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
-        public WebSocketService(ILogger<WebSocketService> logger)
+        public WebSocketService(ILogger<WebSocketService> logger, IClientRegistryService clientRegistry)
         {
             _logger = logger;
+            _clientRegistry = clientRegistry;
         }
 
         public void AddConnection(WebSocket webSocket)
@@ -45,6 +47,8 @@ namespace ChatServer
 
             _userNameCollection.TryAdd(userName, new List<string>());
             _userNameCollection[userName].Add(socketHash);
+
+            _clientRegistry.FireRegister(Startup.OwnHost, userName);
         }
 
         public void RemoveConnection(WebSocket webSocket)
