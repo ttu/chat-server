@@ -78,7 +78,7 @@ namespace ChatServer
             if (env.EnvironmentName == "Docker")
             {
                 logger.LogInformation("Waiting for services");
-                WaitConnections(services);
+                WaitConnections();
             }
 
             if (env.EnvironmentName != Startup.TestingEnv)
@@ -87,7 +87,7 @@ namespace ChatServer
             }
         }
 
-        private void WaitConnections(IServiceProvider services)
+        private void WaitConnections()
         {
             void ExecuteWhileTrue(Action act)
             {

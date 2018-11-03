@@ -18,17 +18,15 @@ namespace ChatServer
         private readonly ConcurrentDictionary<string, WebSocket> _sockets = new ConcurrentDictionary<string, WebSocket>();
         private readonly ConcurrentDictionary<string, List<string>> _userNameCollection = new ConcurrentDictionary<string, List<string>>();
         private readonly ILogger<WebSocketService> _logger;
-        private readonly IClientRegistryService _clientRegistry;
 
         private readonly JsonSerializerSettings _camelCaseSettings = new JsonSerializerSettings
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
-        public WebSocketService(ILogger<WebSocketService> logger, IClientRegistryService clientRegistry)
+        public WebSocketService(ILogger<WebSocketService> logger)
         {
             _logger = logger;
-            _clientRegistry = clientRegistry;
         }
 
         public void AddConnection(WebSocket webSocket)
@@ -39,16 +37,12 @@ namespace ChatServer
 
         public void AddName(WebSocket webSocket, string userName)
         {
-            userName = userName.Replace("\0", "");
-
             _logger.LogInformation($"New user: {userName}");
 
             var socketHash = webSocket.GetHashCode().ToString();
 
             _userNameCollection.TryAdd(userName, new List<string>());
             _userNameCollection[userName].Add(socketHash);
-
-            _clientRegistry.FireRegister(Startup.OwnHost, userName);
         }
 
         public void RemoveConnection(WebSocket webSocket)
@@ -96,7 +90,7 @@ namespace ChatServer
             _socketService = socketService;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context, IClientRegistryService clientRegistry)
         {
             if (!context.WebSockets.IsWebSocketRequest)
             {
@@ -117,7 +111,11 @@ namespace ChatServer
                     case WebSocketMessageType.Text:
                         var content = Encoding.UTF8.GetString(buffer);
                         if (content.StartsWith("username"))
-                            _socketService.AddName(webSocket, content.Split(":")[1]);
+                        {
+                            var username = content.Split(":")[1].Replace("\0", "");
+                            _socketService.AddName(webSocket, username);
+                            clientRegistry.FireRegister(Startup.OwnHost, username);
+                        }
                         continue;
 
                     case WebSocketMessageType.Close:

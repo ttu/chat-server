@@ -50,11 +50,18 @@ namespace ChatBroker
         {
             _logger.LogInformation("New messsage");
 
-            var clientIp = JObject.Parse(message)["receiver"].Value<string>();
+            var receiverName = JObject.Parse(message)["receiver"].Value<string>();
 
             var db = _connectionMultiplexer.GetDatabase();
-            var serverAddressValue = await db.StringGetAsync(clientIp);
+            var serverAddressValue = await db.StringGetAsync(receiverName);
             var serverAddress = serverAddressValue.ToString();
+
+            if (string.IsNullOrEmpty(serverAddress))
+            {
+                // TODO: Save to send later
+                _logger.LogInformation($"User: {receiverName} is not online");
+                return;
+            }
 
             using (var client = _httpClientFactory.CreateClient())
             {
