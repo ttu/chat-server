@@ -1,0 +1,62 @@
+version: '3'
+services:
+  chat.app:
+    build: ./src/chat-app
+    ports:
+     - "3000:3000"
+    depends_on:
+     - chatserver.api
+    environment:
+     - CHAT_URL=http://chatserver.api:5000/api
+     - CHAT_WS=ws://chatserver.api:5000/ws
+    volumes:
+     - './src/chat-app:/app'
+  chatserver.api:
+    build:
+      context: ./src/ChatServer
+      dockerfile: Dockerfile-dev
+    restart: on-failure
+    ports:
+     - "5000:5000"
+    depends_on:
+     - redis
+     - rabbitmq
+    environment:
+     - ASPNETCORE_URLS=http://0.0.0.0:5000
+     - ASPNETCORE_ENVIRONMENT=Docker
+     - DOTNET_RUNNING_IN_CONTAINER=true
+     - Connections__Redis=redis
+     - Connections__RabbitMQ=rabbitmq
+     - OwnHost=http://chatserver.api:5000
+    volumes:
+     - './src/ChatServer:/app'
+  chatbroker.api:
+    build:
+      context: ./src/ChatBroker
+      dockerfile: Dockerfile-dev
+    restart: on-failure
+    ports:
+     - "5550:5550"
+    depends_on:
+     - redis
+     - rabbitmq
+    environment:
+     - ASPNETCORE_URLS=http://0.0.0.0:5550
+     - ASPNETCORE_ENVIRONMENT=Docker
+     - DOTNET_RUNNING_IN_CONTAINER=true
+     - Connections__Redis=redis
+     - Connections__RabbitMQ=rabbitmq
+     - OwnHost=http://chatbroker.api:5550
+    volumes:
+     - './src/ChatBroker:/app'
+  redis:
+    image: "redis:latest"
+    ports:
+     - "6379:6379"
+  postgres:
+    image: "postgres:latest"
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+     - "5672:5672"    
+     - "15672:15672"

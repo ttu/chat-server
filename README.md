@@ -16,6 +16,10 @@ Server for a chat application.
 # Production
 $ docker-compose build
 $ docker-compose up
+
+# Development
+$ docker-compose -f docker-compose-dev.yml build
+$ docker-compose -f docker-compose-dev.yml up
 ```
 
 ### Run development environment

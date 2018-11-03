@@ -7,13 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatServer", "src\ChatServe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{28279952-7423-4199-A85D-C698D6230F02}"
 	ProjectSection(SolutionItems) = preProject
+		docker-compose-dev.yml = docker-compose-dev.yml
 		docker-compose.yml = docker-compose.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatServer.Test", "test\ChatServer.Test\ChatServer.Test.csproj", "{43950622-59F2-4989-83E4-C34EE2AC7F6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatBroker", "src\ChatBroker\ChatBroker.csproj", "{9D68BD30-3E59-460A-8FCD-7008DD72BADC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatBroker", "src\ChatBroker\ChatBroker.csproj", "{9D68BD30-3E59-460A-8FCD-7008DD72BADC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

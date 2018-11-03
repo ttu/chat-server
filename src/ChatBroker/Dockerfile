@@ -1,7 +1,6 @@
 FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
 WORKDIR /app
-EXPOSE 52464
-EXPOSE 44321
+EXPOSE 5550
 
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /app
