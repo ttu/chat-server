@@ -53,23 +53,19 @@ namespace ChatServer
         public static async Task Send(HttpContext context)
         {
             var reader = new StreamReader(context.Request.Body);
-            // No need to seiralize messge as this will just pass it forward
             string text = await reader.ReadToEndAsync();
-
-            var tt = JsonConvert.DeserializeObject<Message>(text);
-
-            var ip = context.Connection.RemoteIpAddress;
 
             if (!text.Contains(_payloadId) || !text.Contains(_receiverId))
                 throw new Exception("Not valid message");
 
-            var host = Startup.OwnHost;//context.Request.Host.Value;
+            var tt = JsonConvert.DeserializeObject<Message>(text);
 
             var _logger = context.RequestServices.GetRequiredService<ILogger<Startup>>();
-            _logger.LogInformation($"FireRegister - Server: {host} User: {tt.Receiver}");
+            _logger.LogInformation($"FireRegister - Server: {Startup.OwnHost} User: {tt.Receiver}");
 
+            // TODO: Same user in multiple server
             var service = context.RequestServices.GetRequiredService<IClientRegistryService>();
-            service.FireRegister(host, tt.Receiver);
+            service.FireRegister(Startup.OwnHost, tt.Receiver);
 
             var messageService = context.RequestServices.GetRequiredService<IMessageSender>();
             messageService.Send(text);

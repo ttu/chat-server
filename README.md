@@ -13,6 +13,7 @@ Server for a chat application.
 ### Run with Docker Compose
 
 ```sh
+# Production
 $ docker-compose build
 $ docker-compose up
 ```
@@ -22,23 +23,34 @@ $ docker-compose up
 Install required systems:
 
 ```sh
+# Create network
+$ docker network create --attachable chat
+
 # Redis
-$ docker run -p 6379:6379 --name chat-redis -d redis
+$ docker run -p 6379:6379 --name chat-redis --network=chat -d redis
 
-RabbitMQ
-$ docker run -d --hostname my-rabbit --name chat-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+# RabbitMQ
+$ docker run -d --network=chat --name chat-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 
-# quick start/stop
+# Quick start/stop
 $ docker start chat-redis && docker start chat-rabbit
 $ docker stop chat-redis && docker stop chat-rabbit
+```
+
+### Run with Docker
+
+```sh
+$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatServer:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
+$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
 ```
 
 ### Notes
 
 #### TODO
 
-*
-* 
+* Production build for React app
+* Network for docker run examples
+* Dev docker compose
 
 #### Redis Commander
 
