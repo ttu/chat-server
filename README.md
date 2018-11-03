@@ -20,28 +20,32 @@ $ docker-compose up
 
 ### Run development environment
 
-Install required systems:
+Install required containers:
 
 ```sh
 # Create network
 $ docker network create --attachable chat
 
 # Redis
-$ docker run -p 6379:6379 --name chat-redis --network=chat -d redis
+$ docker run -d --name chat-redis --network=chat -p 6379:6379 redis
 
 # RabbitMQ
-$ docker run -d --network=chat --name chat-rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+$ docker run -d --name chat-rabbit --network=chat -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 
 # Quick start/stop
 $ docker start chat-redis && docker start chat-rabbit
 $ docker stop chat-redis && docker stop chat-rabbit
 ```
 
+Start project from _Visual Studio_.
+
 ### Run with Docker
 
+Start projects in _containers_.
+
 ```sh
-$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatServer:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
-$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
+$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatServer:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
+$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
 ```
 
 ### Notes
@@ -49,9 +53,11 @@ $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__Rabbit
 #### TODO
 
 * Production build for React app
-* Network for docker run examples
-* Dev docker compose
-
+* Authorization
+* Save messages temporarily to DB
+* Send not sent messages to logged in user
+* Handle client on multiple servers
+ 
 #### Redis Commander
 
 https://www.npmjs.com/package/redis-commander
@@ -67,7 +73,7 @@ Open: http://localhost:8081/
 
 ...
 
-##### Broker / RabbitMQ
+##### ChatBroker / RabbitMQ
 
 ...
 
@@ -136,3 +142,5 @@ https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetc
 https://runnable.com/docker/docker-compose-networking
 
 https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/multi-container-applications-docker-compose
+
+https://github.com/dotnet/dotnet-docker/blob/master/samples/dotnetapp/dotnet-docker-dev-in-container.md#requirements
