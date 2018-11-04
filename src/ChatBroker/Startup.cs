@@ -54,10 +54,11 @@ namespace ChatBroker
                 await context.Response.WriteAsync("Hello from ChatBroker");
             });
 
-            if (env.EnvironmentName == "Docker")
+            // Docker compose doesn't set ASPNETCORE_ENVIRONMENT correctly, so use another env variable
+            if (Configuration.GetValue<bool>("DOTNET_RUNNING_IN_CONTAINER") || env.EnvironmentName == "Docker")
             {
                 logger.LogInformation("Waiting for services");
-                WaitConnections(services);
+                WaitConnections();
             }
 
             if (env.EnvironmentName != "Testing")
@@ -66,7 +67,7 @@ namespace ChatBroker
             }
         }
 
-        private void WaitConnections(IServiceProvider services)
+        private void WaitConnections()
         {
             void ExecuteWhileTrue(Action act)
             {

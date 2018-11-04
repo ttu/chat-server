@@ -112,6 +112,7 @@ namespace ChatServer
                         var content = Encoding.UTF8.GetString(buffer);
                         if (content.StartsWith("username"))
                         {
+                            // TODO: Do this during the login
                             var username = content.Split(":")[1].Replace("\0", "");
                             _socketService.AddName(webSocket, username);
                             clientRegistry.FireRegister(Startup.OwnHost, username);

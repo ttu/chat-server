@@ -75,7 +75,8 @@ namespace ChatServer
 
             app.UseMiddleware<WebSocketMiddleware>();
 
-            if (env.EnvironmentName == "Docker")
+            // Docker compose doesn't set ASPNETCORE_ENVIRONMENT correctly, so use another env variable
+            if (Configuration.GetValue<bool>("DOTNET_RUNNING_IN_CONTAINER") || env.EnvironmentName == "Docker")
             {
                 logger.LogInformation("Waiting for services");
                 WaitConnections();
