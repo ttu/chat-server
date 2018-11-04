@@ -10,7 +10,9 @@ services:
      - CHAT_URL=http://chatserver.api:5000/api
      - CHAT_WS=ws://chatserver.api:5000/ws
   chatserver.api:
-    build: ./src/ChatServer
+    build:
+      context: ./src/ChatServer
+      dockerfile: Dockerfile-dev
     restart: on-failure
     ports:
      - "5000:5000"
@@ -24,7 +26,9 @@ services:
      - Connections__RabbitMQ=rabbitmq
      - OwnHost=http://chatserver.api:5000
   chatbroker.api:
-    build: ./src/ChatBroker
+    build:
+      context: ./src/ChatBroker
+      dockerfile: Dockerfile-dev
     restart: on-failure
     ports:
      - "5550:5550"
