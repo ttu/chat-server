@@ -72,6 +72,16 @@ $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__Rabbit
 $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
 ```
 
+### Production
+
+```sh
+# Build image
+$ docker build -f Dockerfile-prod -t chatapp:prod .
+
+# Start prod React app
+$ docker run -it -p 800:80 --rm --name chat-app-prod chatapp:prod
+```
+
 ### Notes
 
 #### TODO
@@ -139,32 +149,32 @@ ChatBroker: New message from RabbitMQ
 ChatServer: New message /api/receive
  Send to receiver with WebSocket
  Send status to broker (success/fail)
-
- 
-
-
 ```
 
 #### Routing
 
-Routes: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#id7
-
-Route constraints: 
-https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-constraint-reference
-
+* Routes: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#id7
+* Route constraints: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#route-constraint-reference
 
 #### Performance
 
-https://medium.com/@tampajohn/net-core-2-and-golang-797566350095
+* https://medium.com/@tampajohn/net-core-2-and-golang-797566350095
 
 #### Integration tests
 
-https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1#customize-webapplicationfactory
+* https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-2.1#customize-webapplicationfactory
 
 ### Docker networking
 
-https://runnable.com/docker/docker-compose-networking
+* https://runnable.com/docker/docker-compose-networking
+* https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/multi-container-applications-docker-compose
 
-https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/multi-container-applications-docker-compose
+### Docker
 
-https://github.com/dotnet/dotnet-docker/blob/master/samples/dotnetapp/dotnet-docker-dev-in-container.md#requirements
+* https://mherman.org/blog/dockerizing-a-react-app/#production
+* https://github.com/dotnet/dotnet-docker/blob/master/samples/dotnetapp/dotnet-docker-dev-in-container.md#requirements
+
+### VS Debug
+
+* https://blog.quickbird.uk/debug-netcore-containers-remotely-9a103060b2ff
+* https://stackoverflow.com/questions/48661857/how-to-debug-a-net-core-app-runnig-in-linux-docker-container-from-visual-studio

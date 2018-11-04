@@ -9,6 +9,7 @@ services:
     environment:
      - CHAT_URL=http://chatserver.api:5000/api
      - CHAT_WS=ws://chatserver.api:5000/ws
+     - CHOKIDAR_USEPOLLING=true
     volumes:
      - './src/chat-app:/app'
   chatserver.api:

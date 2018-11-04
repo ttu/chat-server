@@ -1,9 +1,11 @@
 version: '3'
 services:
   chat.app:
-    build: ./src/chat-app
+    build:
+      context: ./src/chat-app
+      dockerfile: Dockerfile-prod
     ports:
-     - "3000:3000"
+     - "3000:80"
     depends_on:
      - chatserver.api
     environment:
@@ -12,7 +14,7 @@ services:
   chatserver.api:
     build:
       context: ./src/ChatServer
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile-prod
     restart: on-failure
     ports:
      - "5000:5000"
@@ -28,7 +30,7 @@ services:
   chatbroker.api:
     build:
       context: ./src/ChatBroker
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile-prod
     restart: on-failure
     ports:
      - "5550:5550"

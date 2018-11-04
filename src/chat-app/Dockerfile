@@ -15,5 +15,6 @@ COPY /public /app/public
 
 # Expose PORT 3000 on our virtual machine so we can run our server
 EXPOSE 3000
+EXPOSE 35729
 
 CMD ["npm", "start"]
