@@ -12,12 +12,11 @@ services:
     volumes:
      - './src/chat-app:/app'
   chatserver.api:
-    build:
-      context: ./src/ChatServer
-      dockerfile: Dockerfile-dev
+    build: ./src/ChatServer
     restart: on-failure
     ports:
      - "5000:5000"
+     - "10222:22"
     depends_on:
      - redis
      - rabbitmq
@@ -31,12 +30,11 @@ services:
     volumes:
      - './src/ChatServer:/app'
   chatbroker.api:
-    build:
-      context: ./src/ChatBroker
-      dockerfile: Dockerfile-dev
+    build: ./src/ChatBroker
     restart: on-failure
     ports:
      - "5550:5550"
+     - "10223:22"
     depends_on:
      - redis
      - rabbitmq

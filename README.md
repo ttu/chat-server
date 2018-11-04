@@ -13,13 +13,13 @@ Server for a chat application.
 ### Run with Docker Compose
 
 ```sh
-# Production
+# Developemnt
 $ docker-compose build
 $ docker-compose up
 
-# Development
-$ docker-compose -f docker-compose-dev.yml build
-$ docker-compose -f docker-compose-dev.yml up
+# Production
+$ docker-compose -f docker-compose-prod.yml build
+$ docker-compose -f docker-compose-prod.yml up
 ```
 
 ### Run development environment
@@ -43,10 +43,30 @@ $ docker stop chat-redis && docker stop chat-rabbit
 
 Start project from _Visual Studio_.
 
-### Run with Docker
+### Run projects with Docker
 
-Start projects in _containers_.
+Start debuggable projects in _containers_.
 
+```sh
+# Build image
+$ docker build -t chatserver:dev .
+
+# Start container
+$ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 -p 10222:22 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatServer:/app/ -w /app chatserver:dev
+
+# Login to container
+$ docker exec -it chat-server /bin/bash
+
+# Start SSH server (TODO: should be always on)
+$ service ssh start
+
+# Debug -> Attach to process -> SSH (target: localhost:10222 root:Docker!) 
+# Attach to dotnet exec process
+# Select Managed (.NET Core...)
+```
+
+
+If you don't care about debugging from container, just start clean image with `dotnet watch`
 ```sh
 $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatServer:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
 $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
