@@ -72,6 +72,28 @@ $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__Rabbit
 $ docker run --rm -it -e "Connections__Redis=chat-redis" -e "Connections__RabbitMQ=chat-rabbit" -e "DOTNET_RUNNING_IN_CONTAINER=true" -p 5000:5000 --name chat-server --network=chat -v C:\src\GitHub\chat-server\src\ChatBroker:/app/ -w /app microsoft/dotnet:2.1-sdk dotnet watch run
 ```
 
+##### Debug chat-app React application with VS Code
+
+`sourceMapPathOverrides` in `launch.json`must override folder structure in Docker container.
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "/app/src/*": "${webRoot}/*"
+      }
+    }
+  ]
+}
+```
+
 ### Production
 
 ```sh
