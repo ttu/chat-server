@@ -1,14 +1,30 @@
 # Chat Server
 
-> Note: This is a project for my own testing purposes
+> Note: This project is for my own testing and a reference for Docker scripts
 
 Server for a chat application.
 
-### Diagram
+## Diagram
 
 ![diagram](./docs/chat-server.png)
 
-### Getting Started
+* ChatServer
+  * _.NET Core Web API_
+* ChatBroker
+  * _.NET Core Web API_
+  * Handles new messages from RabbitMQ
+* Client
+  * _React application_
+  * Send and receive messages
+* RabbitMQ
+  * Queue for new messages 
+* Redis
+  * Client register
+  * Has information on which server user is logged on
+* TODO: Postgres
+* TODO: Authentication
+
+## Getting Started
 
 ### Run with Docker Compose
 
@@ -60,9 +76,9 @@ $ docker exec -it chat-server /bin/bash
 # Start SSH server (TODO: should be always on)
 $ service ssh start
 
-# Debug -> Attach to process -> SSH (target: localhost:10222 root:Docker!) 
+# Debug -> Attach to process -> SSH (localhost:10222 root:Docker!) 
 # Attach to dotnet exec process
-# Select Managed (.NET Core...)
+# Select Managed Managed (.NET Core for Unix)
 ```
 
 
@@ -104,15 +120,15 @@ $ docker build -f Dockerfile-prod -t chatapp:prod .
 $ docker run -it -p 800:80 --rm --name chat-app-prod chatapp:prod
 ```
 
-### Notes
+## TODO
 
-#### TODO
-
-* Production build for React app
+* Docker doesn't set ASPNETCORE_ENVIRONMENT correctly on development compose
 * Authorization
 * Save messages temporarily to DB
-* Send not sent messages to logged in user
-* Handle client on multiple servers
+* When user logs in send not sent messages to him immediately
+* Handle same user with multiple clients on multiple servers
+
+## Notes
  
 #### Redis Commander
 
@@ -142,7 +158,7 @@ Open: http://localhost:8081/
 ...
 
 
-#### Flow
+### Flow
 
 ```
 # Client logs in
@@ -173,6 +189,8 @@ ChatServer: New message /api/receive
  Send status to broker (success/fail)
 ```
 
+### Links
+
 #### Routing
 
 * Routes: https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#id7
@@ -181,6 +199,10 @@ ChatServer: New message /api/receive
 #### Performance
 
 * https://medium.com/@tampajohn/net-core-2-and-golang-797566350095
+
+#### RabbitMQ life cycle
+
+* https://www.rabbitmq.com/dotnet-api-guide.html#connection-and-channel-lifspan
 
 #### Integration tests
 

@@ -18,3 +18,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "ChatServer.dll"]
+
+HEALTHCHECK --interval=1m --timeout=10s --retries=3 CMD curl --silent --fail http://localhost:5000 || exit 1

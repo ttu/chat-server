@@ -1,7 +1,7 @@
 # The Node version that we'll be running for our version of React.
 # You may have to search the Node directory for a version that fits
 # the version of React you're using.
-FROM node:11.1.0-alpine
+FROM node:11.1.0
 
 # Create a work directory and copy over our dependency manifest files.
 RUN mkdir /app
@@ -18,3 +18,5 @@ EXPOSE 3000
 EXPOSE 35729
 
 CMD ["npm", "start"]
+
+HEALTHCHECK --interval=1m --timeout=10s --retries=3 CMD curl --silent --fail http://localhost:3000 || exit 1

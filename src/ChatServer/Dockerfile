@@ -22,3 +22,5 @@ EXPOSE 5000
 COPY . ./
 
 ENTRYPOINT ["dotnet", "watch", "run"]
+
+HEALTHCHECK --interval=1m --timeout=10s --retries=3 CMD curl --silent --fail http://localhost:5000 || exit 1

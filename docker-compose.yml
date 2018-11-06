@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 services:
   chat.app:
     build: ./src/chat-app
@@ -19,8 +19,8 @@ services:
      - "5000:5000"
      - "10222:22"
     depends_on:
-     - redis
      - rabbitmq
+     - redis
     environment:
      - ASPNETCORE_URLS=http://0.0.0.0:5000
      - ASPNETCORE_ENVIRONMENT=Docker
@@ -52,6 +52,11 @@ services:
     image: "redis:latest"
     ports:
      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 2s
+      retries: 10
   postgres:
     image: "postgres:latest"
   rabbitmq:
@@ -59,3 +64,9 @@ services:
     ports:
      - "5672:5672"    
      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
