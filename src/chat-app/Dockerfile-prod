@@ -11,6 +11,9 @@ RUN npm install
 COPY /src /app/src
 COPY /public /app/public
 
+ENV REACT_APP_CHAT_URL=http://localhost:5000/api
+ENV REACT_APP_CHAT_WS=ws://localhost:5000/ws
+
 RUN npm run build
 
 # production environment
