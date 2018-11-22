@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using StackExchange.Redis;
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,17 +15,20 @@ namespace ChatBroker
         private readonly IConnection _connection;
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMessageStore _messageStore;
         private readonly ILogger<MessageHandler> _logger;
         private readonly string _queueName = "hello";
 
-        public MessageHandler(IConnection connection, 
-            IConnectionMultiplexer connectionMultiplexer, 
+        public MessageHandler(IConnection connection,
+            IConnectionMultiplexer connectionMultiplexer,
             IHttpClientFactory httpClientFactory,
+            IMessageStore messageStore,
             ILogger<MessageHandler> logger)
         {
             _connection = connection;
             _connectionMultiplexer = connectionMultiplexer;
             _httpClientFactory = httpClientFactory;
+            _messageStore = messageStore;
             _logger = logger;
 
             Start();
@@ -58,29 +62,31 @@ namespace ChatBroker
 
             if (string.IsNullOrEmpty(serverAddress))
             {
-                // TODO: Save to send later
+                await _messageStore.SaveMessage(receiverName, message);
                 _logger.LogInformation($"User: {receiverName} is not online");
                 return;
             }
 
             using (var client = _httpClientFactory.CreateClient())
             {
+                var url = $"{serverAddress}/api/receive";
+
                 try
                 {
-                    var url = $"{serverAddress}/api/receive";
-
                     _logger.LogInformation($"Sending message to: {url}");
 
                     var result = await client.PostAsync(url, new StringContent(message));
 
                     if (result.IsSuccessStatusCode == false)
                     {
-                        // Add result to send later queue
+                        await _messageStore.SaveMessage(receiverName, message);
                         _logger.LogInformation($"Failed sending message to: {url}");
                     }
                 }
-                catch (System.Exception)
+                catch (Exception e)
                 {
+                    _logger.LogError($"Failed sending message to: {url}", e);
+
                     throw;
                 }
             }

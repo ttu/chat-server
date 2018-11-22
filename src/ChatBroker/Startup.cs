@@ -34,10 +34,14 @@ namespace ChatBroker
             services.AddSingleton(new ConnectionFactory() { HostName = Configuration.GetValue<string>("Connections:RabbitMQ") });
             services.AddSingleton(s => s.GetService<ConnectionFactory>().CreateConnection());
 
+            //services.AddSingleton(new MessageStore(Configuration.GetValue<string>("Connections:Postgres")));
+            services.AddSingleton(new InMemoryMessageStore());
+
             services.AddSingleton(s => new MessageHandler(
                             s.GetService<IConnection>(),
                             s.GetService<ConnectionMultiplexer>(),
                             s.GetService<IHttpClientFactory>(),
+                            s.GetService<MessageStore>(),
                             s.GetService<ILogger<MessageHandler>>()));
         }
 

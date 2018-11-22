@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -14,7 +14,7 @@ namespace ChatServer.Test
     {
         private readonly WebSocket _webscoket;
 
-        public Client(string userName, AutoResetEvent are)
+        public Client(string userName, AutoResetEvent are, Action<MessageReceivedEventArgs> receiveFunc)
         {
             _webscoket = new WebSocket($"ws://localhost:5000/ws");
 
@@ -26,8 +26,7 @@ namespace ChatServer.Test
 
             _webscoket.MessageReceived += (s, e) =>
             {
-                var msg = JsonConvert.DeserializeObject<JToken>(e.Message);
-                Assert.Equal("hello", msg["payload"].Value<string>());
+                receiveFunc(e);
                 are.Set();
             };
 
@@ -47,11 +46,17 @@ namespace ChatServer.Test
         {
             var are = new AutoResetEvent(false);
 
-            var chatClient = new Client("timmy", are);
+            var action = new Action<MessageReceivedEventArgs>(e =>
+            {
+                var msg = JsonConvert.DeserializeObject<JToken>(e.Message);
+                Assert.Equal("hello", msg["payload"].Value<string>());
+            });
+
+            var chatClient = new Client("timmy", are, action);
 
             are.WaitOne(); // wait for open
 
-            var chatClient2 = new Client("james", are);
+            var chatClient2 = new Client("james", are, action);
 
             are.WaitOne(); // wait for open
 
