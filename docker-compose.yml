@@ -7,8 +7,8 @@ services:
     depends_on:
      - chatserver.api
     environment:
-     - CHAT_URL=http://chatserver.api:5000/api
-     - CHAT_WS=ws://chatserver.api:5000/ws
+     - REACT_APP_CHAT_URL=http://localhost:5000/api
+     - REACT_APP_CHAT_WS=ws://localhost:5000/ws
      - CHOKIDAR_USEPOLLING=true
     volumes:
      - './src/chat-app:/app'
@@ -59,6 +59,14 @@ services:
       retries: 10
   postgres:
     image: "postgres:latest"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=chatserver
+    #volumes:
+    #  - './data/test/postgres:/var/lib/postgresql/data'
+    ports:
+     - "5432:5432"
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:

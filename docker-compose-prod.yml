@@ -9,8 +9,8 @@ services:
     depends_on:
      - chatserver.api
     environment:
-     - CHAT_URL=http://chatserver.api:5000/api
-     - CHAT_WS=ws://chatserver.api:5000/ws
+     - REACT_APP_CHAT_URL=http://localhost:5000/api
+     - REACT_APP_CHAT_WS=ws://localhost:5000/ws
   chatserver.api:
     build:
       context: ./src/ChatServer

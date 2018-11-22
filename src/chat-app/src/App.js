@@ -3,8 +3,8 @@ import "./App.css";
 
 import client from "./client.js";
 
-const CHAT_URL = process.env.CHAT_URL || 'http://localhost:5000/api';
-const CHAT_WS = process.env.CHAT_WS || 'ws://localhost:5000/ws';
+const CHAT_URL = process.env.REACT_APP_CHAT_URL || 'http://localhost:5000/api';
+const CHAT_WS = process.env.REACT_APP_CHAT_WS || 'ws://localhost:5000/ws';
 
 class App extends Component {
   constructor(props) {
