@@ -21,8 +21,14 @@ Server for a chat application.
 * Redis
   * Client register
   * Has information on which server user is logged on
-* TODO: Postgres
-* TODO: Authentication
+* __TODO__ Postgres
+  * Messages that are not delivered to offline users  
+* __TODO__ Authentication
+* __TODO__ User Service
+  * _Node.js Express_ 
+  * Search users
+  * Uses status
+  * Share message history between clients
 
 ## Getting Started
 

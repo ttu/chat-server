@@ -1,0 +1,42 @@
+{
+  "name": "user-service",
+  "version": "0.1.0",
+  "description": "User service for chat-app",
+  "main": "./src/server.ts",
+  "scripts": {
+    "start": "npm run build && npm run serve",
+    "build": "npm run build-ts && npm run tslint",
+    "build-ts": "tsc",
+    "serve": "node dist/server.js",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "watch-ts": "tsc -w",
+    "watch-node": "nodemon dist/server.js",
+    "start:debug": "ts-node --inspect=5590 --debug-brk --ignore false src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tslint": "echo \"TODO tslint\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ttu/chat-server.git"
+  },
+  "author": "Tomi Tuhkanen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ttu/chat-server/issues"
+  },
+  "homepage": "https://github.com/ttu/chat-server#readme",
+  "dependencies": {
+    "koa": "^2.6.2",
+    "koa-router": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.47",
+    "@types/koa-router": "^7.0.35",
+    "@types/node": "^10.12.10",
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.18.6",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.6"
+  }
+}
